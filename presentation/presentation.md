@@ -17,8 +17,8 @@
 # Agenda
 
 - Xcode
-- Using plugins
-- Developing your own plugin
+- Use plugins
+- Develop your own plugin
 
 ![](agenda.jpg)
 
@@ -55,9 +55,21 @@ Plugins!
 
 ---
 
-# Using Plugins
+# Use Plugins
 
 ![](using.jpg)
+
+---
+
+### How do I even...
+
+![](no-idea.jpg)
+
+---
+
+@_supermarin
+
+![](supermarin.jpg)
 
 ---
 
@@ -67,11 +79,17 @@ The Xcode package manager
 
 http://alcatraz.io
 
-Marin and Delisa
+Marin, Delisa and Jurre
 
-![80%, left, inline](Alcatraz_Team.png)
+![77%, left, inline](Alcatraz_Team.png)
 
 ![right](Alcatraz.png)
+
+---
+
+*curl -fsSL https://raw.github.com/supermarin/Alcatraz/master/Scripts/install.sh | sh*
+
+![](background.jpg)
 
 ---
 
@@ -147,7 +165,7 @@ opens
 
 ---
 
-# Developing your own plugin
+# Develop your own plugin
 
 ![](Xcode_quit_1.png)
 
@@ -189,6 +207,236 @@ opens
 
 ---
 
+### Let's build something useful...
+
+.
+
+![100%, original](Orta_Tweet.png)
+
+---
+
+# General points
+
+![](generalrelativity.jpg)
+
+---
+
+# Compatibility UUIDs
+
+### This might appear in your *system.log*
+
+    [MT] PluginLoading: Required plug-in compatibility UUID 640F884E-CE55-4B40-87C0-8869546CAB7A
+    for plug-in at path '~/Library/Application Support/Developer/Shared/Xcode/Plug-ins/CocoaPodsPlugIn.xcplugin'
+    not present in DVTPlugInCompatibilityUUIDs
+
+    $ defaults read /Applications/Xcode51-DP2.app/Contents/Info DVTPlugInCompatibilityUUID
+    640F884E-CE55-4B40-87C0-8869546CAB7A
+
+### Add that UUID to your plugin's *Info.plist*
+
+![](background.jpg)
+
+---
+
+### This will happen all the time
+
+![100%, filtered](Xcode_quit_1.png)
+
+![100%, filtered](Xcode_quit_2.png)
+
+---
+
+# Your only friends...
+
+    $ tail -f /var/log/system.log
+
+    $ rm -rf ~/Library/Application Support/Developer/Shared/Xcode/Plug-ins/*
+
+- Debug from the command line with *lldb*...
+- or with a second instance of Xcode
+
+![](background.jpg)
+
+---
+
+# Headers
+
+Use *class-dump* yourself, or just grab
+https://github.com/luisobo/Xcode5-RuntimeHeaders
+
+![](background.jpg)
+
+---
+
+# What we are looking for
+
+- How to detect if the user types in the editor?
+- How to hide the debug pane?
+
+![](background.jpg)
+
+---
+
+`grep -ri editor *`
+
+![](background.jpg)
+
+---
+
+    @interface IDEWorkspaceWindowController : NSWindowController
+          <NSWindowDelegate,
+           IDEEditorAreaContainer,
+           DVTStatefulObject,
+           DVTTabbedWindowControlling,
+           DVTEditor,
+           DVTInvalidation>
+
+    [...]
+
+    @property(readonly) IDEEditorArea *editorArea;
+
+    [...]
+
+    @end
+
+---
+
+    @interface IDEEditorArea : IDEViewController <IDEDebuggerBarEditorInfoProvider>
+
+    [...]
+
+    - (void)toggleDebuggerVisibility:(id)arg1;
+    - (void)activateConsole:(id)arg1;
+    @property BOOL showDebuggerArea;
+
+    [...]
+
+    @end
+
+---
+
+    - (void)toggleDebuggersIfNeeded {
+      for (NSWindowController *workspaceWindowController in
+            [objc_getClass("IDEWorkspaceWindowController")
+              workspaceWindowControllers]) {
+        id editorArea = [workspaceWindowController editorArea];
+        if ([editorArea showDebuggerArea]) {
+            [editorArea toggleDebuggerVisibility:nil];
+        }
+      }
+    }
+
+---
+
+    @interface NSObject (ShutUpWarnings)
+
+    -(id)editorArea;
+    -(BOOL)showDebuggerArea;
+    -(void)toggleDebuggerVisibility:(id)arg;
+    -(NSArray*)workspaceWindowControllers;
+
+    @end
+
+---
+
+# Grepping through _subtreeDescription
+
+^ Logged view hierarchy under IDEWorkspaceWindowController
+
+`grep -i source *`
+
+    [   AF O P LU ] h=--- v=--- NSClipView 0x7f822e93e990 f=(35,0,885,662) b=(0,637,-,-)
+      TIME drawRect: min/mean/max 0.00/0.00/0.00 ms
+    [   AF O   LU ] h=-&- v=-&- DVTSourceTextView 0x7f822c723f00 f=(0,0,885,1339) b=(-)
+      TIME drawRect: min/mean/max 0.00/0.00/0.00 ms
+    [   A      LU ] h=--- v=--- DVTMessageBubbleView 0x7f822eb5c080 f=(638,975,247,12) b=(-)
+      TIME drawRect: min/mean/max 0.23/0.42/0.68 ms
+
+---
+
+DVTSourceTextView
+
+![](background.jpg)
+
+---
+
+    - (void)swizzleDidChangeTextInSourceTextView {
+        [[objc_getClass("DVTSourceTextView") new]
+            yl_swizzleSelector:@selector(didChangeText)
+                     withBlock:^void(id sself) {
+                       [self toggleDebuggersIfNeeded];
+
+                       [sself yl_performSelector:@selector(didChangeText)
+                                   returnAddress:NULL
+                               argumentAddresses:NULL];
+                      }];
+    }
+
+---
+
+![](wat.jpg)
+
+---
+
+![200%, original](swizzle.jpg)
+
+---
+
+    @interface NSObject (YOLO)
+
+    -(void)yl_performSelector:(SEL)aSelector
+                returnAddress:(void *)result
+            argumentAddresses:(void *)arg1, ...;
+    -(void)yl_swizzleSelector:(SEL)originalSelector
+                    withBlock:(id)block;
+
+    @end
+
+---
+
+![100%, original](plugin.gif)
+
+---
+
+# Ship it
+
+    {
+      "name": "My Life-Changing Xcode Plugin",
+      "url": "https://github.com/me/xcode-life-changing-plugin",
+      "description": "Makes Xcode stop, collaborate and listen."
+    }
+
+Send a pull request to the Alcatraz packages repo
+
+https://github.com/supermarin/alcatraz-packages
+
+---
+
+# Using DTrace
+
+- Powerful dynamic tracing framework
+- Can be used to log any objc_msgSend()
+- Useful for seeing call trees of a specific class
+- http://chen.do/blog/2013/10/22/reverse-engineering-xcode-with-dtrace/
+
+![](background.jpg)
+
+---
+
+https://github.com/kattrali/xcode-devtools
+https://coderwall.com/p/-mgtww
+
+![](background.jpg)
+
+---
+
+alcatraz.io
+
+![](supermarin.jpg)
+
+---
+
 https://github.com/neonichu/extending-xcode/
+https://github.com/neonichu/BBUDebuggerTuckAway/
 
 ![](ironcat.jpg)
