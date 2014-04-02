@@ -299,6 +299,8 @@ https://github.com/luisobo/Xcode5-RuntimeHeaders
 
     @end
 
+![](background.jpg)
+
 ---
 
     @interface IDEEditorArea : IDEViewController <IDEDebuggerBarEditorInfoProvider>
@@ -313,6 +315,8 @@ https://github.com/luisobo/Xcode5-RuntimeHeaders
 
     @end
 
+![](background.jpg)
+
 ---
 
     - (void)toggleDebuggersIfNeeded {
@@ -326,6 +330,8 @@ https://github.com/luisobo/Xcode5-RuntimeHeaders
       }
     }
 
+![](background.jpg)
+
 ---
 
     @interface NSObject (ShutUpWarnings)
@@ -336,6 +342,8 @@ https://github.com/luisobo/Xcode5-RuntimeHeaders
     -(NSArray*)workspaceWindowControllers;
 
     @end
+
+![](background.jpg)
 
 ---
 
@@ -351,6 +359,8 @@ https://github.com/luisobo/Xcode5-RuntimeHeaders
       TIME drawRect: min/mean/max 0.00/0.00/0.00 ms
     [   A      LU ] h=--- v=--- DVTMessageBubbleView 0x7f822eb5c080 f=(638,975,247,12) b=(-)
       TIME drawRect: min/mean/max 0.23/0.42/0.68 ms
+
+![](background.jpg)
 
 ---
 
@@ -372,6 +382,8 @@ DVTSourceTextView
                       }];
     }
 
+![](background.jpg)
+
 ---
 
 ![](wat.jpg)
@@ -392,6 +404,8 @@ DVTSourceTextView
 
     @end
 
+![](background.jpg)
+
 ---
 
 ![100%, original](plugin.gif)
@@ -409,6 +423,8 @@ DVTSourceTextView
 Send a pull request to the Alcatraz packages repo
 
 https://github.com/supermarin/alcatraz-packages
+
+![](background.jpg)
 
 ---
 
