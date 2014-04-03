@@ -187,7 +187,7 @@ opens
 # Plugin Template
 
 - Xcode 5.1 compatible
-- Shows a menu item
+- Shows a menu item for testing
 - On build, plugin ends up here: *~/Library/Application Support/Developer/Shared/Xcode/Plug-ins/*
 - Just restart and it shows up
 
@@ -403,6 +403,22 @@ DVTSourceTextView
                     withBlock:(id)block;
 
     @end
+
+![](background.jpg)
+
+---
+
+    - (void)swizzleDidChangeTextInSourceTextView {
+        [[objc_getClass("DVTSourceTextView") new]
+            yl_swizzleSelector:@selector(didChangeText)
+                     withBlock:^void(id sself) {
+                       [self toggleDebuggersIfNeeded];
+
+                       [sself yl_performSelector:@selector(didChangeText)
+                                   returnAddress:NULL
+                               argumentAddresses:NULL];
+                      }];
+    }
 
 ![](background.jpg)
 
