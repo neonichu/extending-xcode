@@ -455,6 +455,12 @@ https://github.com/supermarin/alcatraz-packages
 
 ---
 
+# Thank you!
+
+![](marin-6-thumb.gif)
+
+---
+
 https://github.com/kattrali/xcode-devtools
 https://coderwall.com/p/-mgtww
 
